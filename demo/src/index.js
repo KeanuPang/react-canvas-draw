@@ -10,15 +10,16 @@ class Demo extends Component {
     width: 400,
     height: 400,
     brushRadius: 10,
-    lazyRadius: 12
+    lazyRadius: 12,
+    lastLine: {}
   };
   componentDidMount() {
-    // let's change the color randomly every 2 seconds. fun!
-    window.setInterval(() => {
-      this.setState({
-        color: "#" + Math.floor(Math.random() * 16777215).toString(16)
-      });
-    }, 2000);
+  }
+  updateLastLine(lastLine) {
+    const that = this;
+    this.setState({
+      lastLine: lastLine
+    });
   }
   render() {
     return (
@@ -27,7 +28,7 @@ class Demo extends Component {
         <iframe
           title="GitHub link"
           src="https://ghbtns.com/github-btn.html?user=embiem&repo=react-canvas-draw&type=star&count=true"
-          frameborder="0"
+          frameBorder="0"
           scrolling="0"
           width="160px"
           height="30px"
@@ -92,6 +93,7 @@ class Demo extends Component {
           <button
             onClick={() => {
               this.saveableCanvas.clear();
+              this.mirrorCanvas.clear();
             }}
           >
             Clear
@@ -99,6 +101,7 @@ class Demo extends Component {
           <button
             onClick={() => {
               this.saveableCanvas.undo();
+              this.mirrorCanvas.undo();
             }}
           >
             Undo
@@ -144,14 +147,28 @@ class Demo extends Component {
             />
           </div>
         </div>
+
+        <div className="row">
         <CanvasDraw
+          style={{ float: "left"}}
           ref={canvasDraw => (this.saveableCanvas = canvasDraw)}
           brushColor={this.state.color}
           brushRadius={this.state.brushRadius}
           lazyRadius={this.state.lazyRadius}
           canvasWidth={this.state.width}
           canvasHeight={this.state.height}
+          onDrawFinished={(lastLine) => {this.updateLastLine(lastLine);}}
         />
+         <CanvasDraw
+          style={{ float: "left", marginLeft: "20px"}}
+          disabled
+          hideGrid
+          ref={canvasDraw => (this.mirrorCanvas = canvasDraw)}
+          lastLine={this.state.lastLine}
+        />
+        </div>
+        <div style={{clear:"both"}}></div>
+
         <p>
           The following is a disabled canvas with a hidden grid that we use to
           load & show your saved drawing.

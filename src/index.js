@@ -52,6 +52,8 @@ export default class extends PureComponent {
     disabled: PropTypes.bool,
     imgSrc: PropTypes.string,
     saveData: PropTypes.string,
+    onDrawFinished: PropTypes.func,
+    lastLine: PropTypes.object,
     immediateLoading: PropTypes.bool
   };
 
@@ -68,6 +70,7 @@ export default class extends PureComponent {
     disabled: false,
     imgSrc: "",
     saveData: "",
+    lastLine: {},
     immediateLoading: false
   };
 
@@ -144,6 +147,10 @@ export default class extends PureComponent {
       // Signal this.loop function that values changed
       this.valuesChanged = true;
     }
+
+    if (this.props.lastLine && JSON.stringify(this.props.lastLine) !== '{}') {
+      this.drawLine(this.props.lastLine);
+    }
   }
 
   drawImage = () => {
@@ -156,6 +163,11 @@ export default class extends PureComponent {
     // Draw the image once loaded
     this.image.onload = () =>
       drawImage({ ctx: this.ctx.grid, img: this.image });
+  };
+
+  drawLine = (line) => {
+    this.lines.push(line);
+    this.simulateDrawingLines({ lines: this.lines, immediate: true });
   };
 
   undo = () => {
@@ -280,6 +292,10 @@ export default class extends PureComponent {
     this.isPressing = false;
 
     this.saveLine();
+
+    if(this.props.onDrawFinished) {
+      this.props.onDrawFinished(this.lines.slice(-1)[0]);
+    }
   };
 
   handleCanvasResize = (entries, observer) => {
